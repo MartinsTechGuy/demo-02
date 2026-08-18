@@ -485,6 +485,13 @@ P2P       → <span class="kw">Priority 1</span>  (zemākā)</code></pre>
       <!-- Inline SVG network diagram -->
       <svg viewBox="0 0 780 320" xmlns="http://www.w3.org/2000/svg" font-family="Segoe UI,sans-serif" font-size="13">
 
+        <!-- Arrow markers -->
+        <defs>
+          <marker id="arr"  markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#2563eb"/></marker>
+          <marker id="arr2" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#22c55e"/></marker>
+          <marker id="arr3" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#f59e0b"/></marker>
+        </defs>
+
         <!-- Internet cloud -->
         <ellipse cx="90" cy="160" rx="72" ry="48" fill="#1e3a5f" stroke="#2563eb" stroke-width="2"/>
         <text x="90" y="155" text-anchor="middle" fill="#93c5fd" font-weight="700">🌐</text>
@@ -539,12 +546,6 @@ P2P       → <span class="kw">Priority 1</span>  (zemākā)</code></pre>
         <!-- Label OPT1 -->
         <text x="365" y="198" fill="#fcd34d" font-size="10">em2/OPT1</text>
 
-        <!-- Arrow markers -->
-        <defs>
-          <marker id="arr"  markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#2563eb"/></marker>
-          <marker id="arr2" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#22c55e"/></marker>
-          <marker id="arr3" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#f59e0b"/></marker>
-        </defs>
       </svg>
     </div>
 
@@ -833,23 +834,31 @@ WAN:22  → <span class="kw">192.168.1.10:22</span>   <span class="cm"># SSH</sp
   /* ── Quiz ── */
   document.getElementById('quiz-submit').addEventListener('click', () => {
     const questions = document.querySelectorAll('.quiz-q');
-    let score = 0;
     let allAnswered = true;
 
+    // First pass: check completeness only
+    questions.forEach((q, i) => {
+      const sel = q.querySelector(`input[name="q${i+1}"]:checked`);
+      const fb = document.getElementById(`fb${i+1}`);
+      if (!sel) {
+        allAnswered = false;
+        fb.className = 'feedback err';
+        fb.textContent = '⚠️ Lūdzu, izvēlieties atbildi!';
+      } else if (fb.textContent === '⚠️ Lūdzu, izvēlieties atbildi!') {
+        fb.textContent = '';
+      }
+    });
+
+    if (!allAnswered) return;
+
+    // Second pass: score and style
+    let score = 0;
     questions.forEach((q, i) => {
       const correct = q.dataset.correct;
       const sel = q.querySelector(`input[name="q${i+1}"]:checked`);
       const fb = document.getElementById(`fb${i+1}`);
 
-      // reset styles
       q.querySelectorAll('.opt-label').forEach(l => l.classList.remove('correct', 'wrong'));
-
-      if (!sel) {
-        allAnswered = false;
-        fb.className = 'feedback err';
-        fb.textContent = '⚠️ Lūdzu, izvēlieties atbildi!';
-        return;
-      }
 
       // mark correct answer green always
       q.querySelectorAll('.opt-label').forEach(l => {
@@ -866,8 +875,6 @@ WAN:22  → <span class="kw">192.168.1.10:22</span>   <span class="cm"># SSH</sp
         fb.textContent = '❌ Nepareizi. Pareizā atbilde ir atzīmēta zaļā krāsā.';
       }
     });
-
-    if (!allAnswered) return;
 
     const result = document.getElementById('quiz-result');
     const badge  = document.getElementById('result-badge');
